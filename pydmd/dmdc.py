@@ -289,7 +289,7 @@ class DMDc(DMDBase):
         data = np.array(data).T
         return data
 
-    def fit(self, X, I, B=None):
+    def fit(self, X, I, Y=None, B=None):
         """
         Compute the Dynamic Modes Decomposition with control given the original
         snapshots and the control input data. The matrix `B` that controls how
@@ -300,6 +300,7 @@ class DMDc(DMDBase):
         :type X: numpy.ndarray or iterable
         :param I: the control input.
         :type I: numpy.ndarray or iterable
+        :param Y: the "next step" snapshots (optional)
         :param numpy.ndarray B: matrix that controls the control input
             influences the system evolution.
         :type B: numpy.ndarray or iterable
@@ -313,8 +314,13 @@ class DMDc(DMDBase):
         if self._lag < 1:
             raise ValueError("Time lag must be positive.")
 
-        X = self.snapshots[:, : -self._lag]
-        Y = self.snapshots[:, self._lag :]
+        
+        if Y is None:
+            Y = self.snapshots[:, self._lag :]
+            X = self.snapshots[:, : -self._lag]
+        else:
+            X = self.snapshots
+
 
         self._set_initial_time_dictionary(
             {"t0": 0, "tend": n_samples - 1, "dt": 1}
